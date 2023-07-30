@@ -16,22 +16,16 @@ class SplashScreen(QSplashScreen):
         super().__init__(pixmap, Qt.WindowStaysOnTopHint)
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.label = QLabel(self)
-        self.label.setObjectName("Capitão Biscoito")
+        self.label.setObjectName("PhotoCV")
         self.label.setEnabled(True)
         self.label.setGeometry(QRect(0, 0, 300, 300))
         self.label.setStyleSheet(
-            """QFrame, QLabel{
+            """ 
+            QLabel{
                 border: 2px solid #85C2FF;
                 border-radius: 4px;
-                color: #EBF5FF;
-                padding: 2px;
-                font-size:35px;
-                font-weight: bold;
-                text-align: center;
             }"""
         )
-
-        self.label.setText("Capitão Biscoito")
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setGeometry(10, pixmap.height() - 60, pixmap.width() - 20, 30)
         self.progress_bar.setMinimum(0)
@@ -39,14 +33,16 @@ class SplashScreen(QSplashScreen):
             """
             QProgressBar {
                 background-color: #fff;
-                border: 2px solid #85C2FF;
+                border: 2px solid #003366;
                 border-radius: 10px;
                 text-align: center;
+                font-size: 15px;
+                font-weight: bold;
                 color: black;
             }
             QProgressBar:chunk {
                 border-radius: 8px;
-                background-color: #003366;
+                background-color: #85C2FF;
             }
         """
         )
@@ -59,6 +55,7 @@ class SplashScreen(QSplashScreen):
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowFlag(Qt.FramelessWindowHint)
         self.viewer = QLabel(self)
         self.viewer.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.viewer.setMinimumSize(QSize(800, 500))
@@ -117,21 +114,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def greenColor(self):
         green_channel = self.image[:, :, 1]
-        green_img = np.zeros(self.image.shape)
-        green_img[:, :, 1] = green_channel
-        self.setImage(green_img)
+        image = np.zeros(self.image.shape)
+        image[:, :, 1] = green_channel
+        self.setImage(image)
 
     def redColor(self):
-        green_channel = self.image[:, :, 2]
-        green_img = np.zeros(self.image.shape)
-        green_img[:, :, 2] = green_channel
-        self.setImage(green_img)
+        red_channel = self.image[:, :, 2]
+        image = np.zeros(self.image.shape)
+        image[:, :, 2] = red_channel
+        self.setImage(image)
 
     def blueColor(self):
-        green_channel = self.image[:, :, 0]
-        green_img = np.zeros(self.image.shape)
-        green_img[:, :, 0] = green_channel
-        self.setImage(green_img)
+        blue_channel = self.image[:, :, 0]
+        image = np.zeros(self.image.shape)
+        image[:, :, 0] = blue_channel
+        self.setImage(image)
 
     def sizeValues(self):
         self.input = QLineEdit()
@@ -183,18 +180,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         results = self.model(self.image)
         detected_objects = results.pandas().xyxy[0]
         print(detected_objects)
-        image = cv2.imread(self.filename)
         for obj in detected_objects.to_dict(orient="records"):
             x_min, y_min, x_max, y_max = map(
                 int, [obj["xmin"], obj["ymin"], obj["xmax"], obj["ymax"]]
             )
             class_id = obj["name"]
 
-            cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+            cv2.rectangle(self.image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
 
             label = f"{class_id}"
             cv2.putText(
-                image,
+                self.image,
                 label,
                 (x_min, y_min - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
@@ -202,11 +198,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 (0, 255, 0),
                 2,
             )
-        self.setImage(image)
+        self.setImage(self.image)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     pixmap = QPixmap("assets\\189447.jpg")
     splash = SplashScreen(pixmap)
     splash.show()

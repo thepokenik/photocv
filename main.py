@@ -11,29 +11,27 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 
-class SplashScreen(QSplashScreen):
+class SplashScreen(QWidget):
     def __init__(self, pixmap):
-        super().__init__(pixmap, Qt.WindowStaysOnTopHint)
-        self.setWindowFlag(Qt.FramelessWindowHint)
+        super().__init__()
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+
+        layout = QVBoxLayout(self)
+
         self.label = QLabel(self)
-        self.label.setObjectName("PhotoCV")
-        self.label.setEnabled(True)
-        self.label.setGeometry(QRect(0, 0, 300, 300))
-        self.label.setStyleSheet(
-            """ 
-            QLabel{
-                border: 2px solid #85C2FF;
-                border-radius: 4px;
-            }"""
-        )
-        self.progress_bar = QProgressBar(self)
-        self.progress_bar.setGeometry(10, pixmap.height() - 60, pixmap.width() - 20, 30)
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setStyleSheet(
+        self.label.setPixmap(pixmap)
+        layout.addWidget(self.label)
+
+        self.progressBar = QProgressBar(self)
+        layout.addWidget(self.progressBar)
+        self.progressBar.setMinimum(0)
+        self.progressBar.setStyleSheet(
             """
             QProgressBar {
-                background-color: #fff;
-                border: 2px solid #003366;
+                background-color: rgba(255, 255, 255, 0);
+                border: 2px solid rgb(200, 200, 200);
                 border-radius: 10px;
                 text-align: center;
                 font-size: 15px;
@@ -46,10 +44,18 @@ class SplashScreen(QSplashScreen):
             }
         """
         )
-        self.progress_bar.setMaximum(100)
+        self.progressBar.setMaximum(100)
 
     def set_progress(self, value):
-        self.progress_bar.setValue(value)
+        self.progressBar.setValue(value)
+
+
+def centerWindow(window):
+    available_geometry = QGuiApplication.screens()[0].availableGeometry()
+    window_rect = window.geometry()
+    x = (available_geometry.width() - window_rect.width()) // 2
+    y = (available_geometry.height() - window_rect.height()) // 2
+    window.move(x, y)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -151,16 +157,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def zoomIn(self):
         self.zoom += 0.5
         self.label_2.setText(f"Zoom: {int(self.zoom*100)}%")
-        self.zoom_at()
+        self.zoomAt()
 
     def zoomOut(self):
         self.zoom -= 0.5
         if self.zoom < 1:
             self.zoom = 1
         self.label_2.setText(f"Zoom: {int(self.zoom*100)}%")
-        self.zoom_at()
+        self.zoomAt()
 
-    def zoom_at(self, coord=None):
+    def zoomAt(self, coord=None):
         h, w, _ = [self.zoom * i for i in self.image.shape]
 
         if coord is None:
@@ -204,9 +210,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    pixmap = QPixmap("assets\\189447.jpg")
+    pixmap = QPixmap("assets/logo.png")
+    pixmap = pixmap.scaled(250, 250)
     splash = SplashScreen(pixmap)
     splash.show()
+    centerWindow(splash)
     i = 0
 
     def update_progress():
@@ -217,8 +225,9 @@ if __name__ == "__main__":
             if i >= 55 and i <= 67:
                 time.sleep(0.3)
         else:
-            splash.finish(window)
+            splash.close()
             window.show()
+            centerWindow(window)
             return
         QTimer.singleShot(50, update_progress)
 

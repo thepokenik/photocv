@@ -2,15 +2,14 @@
 
 ![Logo](/assets/logo150.png)
 
-Projeto apenas para estudo das bibliotecas PySide6 e OpenCv, feito para facilitar o uso de filtros e funcionalidades do OpenCv nas fotos com o uso de um aplicativo Desktop.
-
+Project for studying the PySide6 and OpenCV libraries, created to streamline the use of OpenCv filters and functionalities on photos through a desktop application.
 
 ## Screenshots
 
 ![UI](/assets/mainscreen.png)
 
-## Tecnologias utilizadas
+## Technologies used:
 
-**Linguagem:** Python
+**Language:** Python
 
-**Bibliotecas:** PySide6, OpenCV, PyTorch
+**Libraries:** PySide6, OpenCV, PyTorch
